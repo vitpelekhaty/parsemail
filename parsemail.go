@@ -229,7 +229,21 @@ func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody str
 			return textBody, htmlBody, attachments, embeddedFiles, err
 		}
 
-		if contentType == contentTypeMultipartAlternative {
+		if contentType == contentTypeTextPlain {
+			ppContent, err := ioutil.ReadAll(part)
+			if err != nil {
+				return textBody, htmlBody, attachments, embeddedFiles, err
+			}
+
+			textBody += strings.TrimSuffix(string(ppContent[:]), "\n")
+		} else if contentType == contentTypeTextHtml {
+			ppContent, err := ioutil.ReadAll(part)
+			if err != nil {
+				return textBody, htmlBody, attachments, embeddedFiles, err
+			}
+
+			htmlBody += strings.TrimSuffix(string(ppContent[:]), "\n")
+		} else if contentType == contentTypeMultipartAlternative {
 			textBody, htmlBody, embeddedFiles, err = parseMultipartAlternative(part, params["boundary"])
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, err
